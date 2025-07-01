@@ -5,7 +5,8 @@ IN=${IN:-$PASH_TOP/evaluation/benchmarks/oneliners/input/1G.txt}
 dict=${dict:-$PASH_TOP/evaluation/benchmarks/oneliners/input/dict.txt}
 
 cat $IN |
-    iconv -f utf-8 -t ascii//translit | # remove non utf8 characters
+    # iconv -f utf-8 -t ascii//translit | # remove non utf8 characters
+    sed 's/[^[:print:]]//g' |
     # groff -t -e -mandoc -Tascii |  # remove formatting commands
     col -bx |                      # remove backspaces / linefeeds
     tr -cs A-Za-z '\n' |

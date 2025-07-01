@@ -9,13 +9,29 @@
 # curl https://balab.aueb.gr/~dds/oasa-$(date --date='1 days ago' +'%y-%m-%d').bz2 | 
 #   bzip2 -d |                  # decompress
 # Replace the line below with the two lines above to stream the latest file
-cat $IN |                    # assumes saved input
-  sed 's/T\(..\):..:../,\1/' |  # keep times only
-  cut -d ',' -f 1,2 |           # keep only time and date
-  sort -u |                     # removing duplicate entries
-  cut -d ',' -f 1 |             # keep only date
-  sort |                        # preparing for uniq
-  uniq -c |                     # count unique dates
-  awk -v OFS="\t" "{print \$2,\$1}"     # print first date, then count
+# cat $IN |                    # assumes saved input
+#   sed 's/T\(..\):..:../,\1/' |  # keep times only
+#   cut -d ',' -f 1,2 |           # keep only time and date
+#   sort -u |                     # removing duplicate entries
+#   cut -d ',' -f 1 |             # keep only date
+#   sort |                        # preparing for uniq
+#   uniq -c |                     # count unique dates
+#   awk -v OFS="\t" "{print \$2,\$1}"     # print first date, then count
 
+
+temp_file=$(mktemp) 
+
+cat $IN |                # assumes saved input
+  sed 's/T..:..:..//' |     # hide times
+  cut -d ',' -f 1,2 |           # keep only time and date
+  sort |
+  uniq |
+  cut -d ',' -f 1 |         # keep all dates
+  sort |                    # preparing for uniq
+  uniq -c > "$temp_file"
+
+cat "$temp_file" |
+ awk -v OFS="\t" "{print \$2,\$1}" 
+
+rm "$temp_file"
 # diff out{1,}

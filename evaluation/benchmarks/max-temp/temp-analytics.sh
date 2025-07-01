@@ -21,19 +21,56 @@ seq $FROM $TO |
   gunzip > "${data_file}"
 
 ## Processing
-cat "${data_file}" |
-  cut -c 89-92 |
-  grep -v 999 |
-  sort -rn |
-  head -n1 > max.txt
+# cat "${data_file}" |
+#   cut -c 89-92 |
+#   grep -v 999 |
+#   sort -rn |
+#   head -n1 > max.txt
+
+
+temp_file=$(mktemp)
 
 cat "${data_file}" |
-  cut -c 89-92 |
-  grep -v 999 |
-  sort -n |
-  head -n1 > min.txt
+    cut -c 89-92 |
+    grep -v 999 |
+    sort -rn > "$temp_file"
+
+cat "$temp_file" |
+    head -n1 > max.txt
+
+rm "$temp_file"
+
+
+# cat "${data_file}" |
+#   cut -c 89-92 |
+#   grep -v 999 |
+#   sort -n |
+#   head -n1 > min.txt
+
+temp_file=$(mktemp)
 
 cat "${data_file}" |
+    cut -c 89-92 |
+    grep -v 999 |
+    sort -n > "$temp_file"
+
+cat "$temp_file" |
+    head -n1 > min.txt
+
+rm "$temp_file"
+
+# cat "${data_file}" |
+#   cut -c 89-92 |
+#   grep -v 999 |
+#   awk "{ total += \$1; count++ } END { print total/count }" > average.txt 
+
+temp_file=$(mktemp)
+cat "${data_file}" |
   cut -c 89-92 |
-  grep -v 999 |
+  grep -v 999 > "$temp_file"
+
+cat "$temp_file" |
   awk "{ total += \$1; count++ } END { print total/count }" > average.txt 
+
+rm "$temp_file"
+

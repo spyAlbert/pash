@@ -103,26 +103,39 @@ trigrams_aux()
 }
 
 
-extract_text()
-{
-    while read -r line
-    do
-        cat $line |
-            iconv -c -t ascii//TRANSLIT |
-            pandoc +RTS -K64m -RTS --from html --to plain --quiet
-    done
-}
+# extract_text()
+# {
+#     while read -r line
+#     do
+#         cat $line |
+#             iconv -c -t ascii//TRANSLIT |
+#             pandoc +RTS -K64m -RTS --from html --to plain --quiet
+#     done
+# }
 
-export -f extract_text
+# export -f extract_text
+
+# cat $IN |
+#   sed "s#^#$WIKI#" |
+#   extract_text |
+#   tr -cs A-Za-z '\n' |
+#   tr A-Z a-z |
+#   grep -vwFf $WEB_INDEX_DIR/stopwords.txt |
+#   $WEB_INDEX_DIR/stem-words.js |
+#   tee 3grams 2grams 1grams > /dev/null &
 
 cat $IN |
-  sed "s#^#$WIKI#" |
-  extract_text |
+  sed "s#^\./#$WIKI/#" |
+  xargs -d '\n' cat  |
+  sed 's/[^[:print:]\t]//g'|
+  sed 's/<[^>]*>//g' |
   tr -cs A-Za-z '\n' |
-  tr A-Z a-z |
+  tr A-Z a-z > tmp.txt 
+
+cat tmp.txt |
   grep -vwFf $WEB_INDEX_DIR/stopwords.txt |
-  $WEB_INDEX_DIR/stem-words.js |
-  tee 3grams 2grams 1grams > /dev/null &
+  $WEB_INDEX_DIR/stem-words.js | 
+  tee 2grams > /dev/null &
 
 cat 1grams |
     sort |
@@ -145,4 +158,5 @@ cat 3grams |
     uniq -c |
     sort -rn # > 3-grams.txt
 
+rm tmp.txt
 rm {1,2,3}grams
